@@ -1,0 +1,30 @@
+product_id,product_name,category,subcategory,size,base_price,is_active,created_at,updated_at
+P001,Product 1,food,sandwich,1 slice,77.02,1,14/11/2024 09:00:00,N/A
+P002,Product 2,dessert,cake,1 slice,46.7,false,2024/11/06 09:00:00,N/A
+P003,Product 3,tea,black,200ml,74.18,yes,2024/11/11 09:00:00,N/A
+P004,Product 4,coffee,espresso,300ml,63.93,1,2024/11/02 09:00:00,N/A
+P005,Product 5,tea,black,1 slice,52.78,1,13/11/2024 09:00:00,01/01/2025 18:00:00
+P006,Product 6,tea,black,300ml,"59,0",true,2024/11/02 09:00:00,N/A
+P007,Product 7,food,sandwich,1 slice,"40,85",0,2024/11/02 09:00:00,N/A
+P008,Product 8,food,sandwich,1 slice,34.03,true,06/11/2024 09:00:00,2025-01-04 13:00:00
+P009,Product 9,coffee,milk_coffee,1 slice,56.7,1,10/11/2024 09:00:00,2025-01-09 17:00:00
+P010,Product 10,coffee,espresso,1 pc,"75,61",yes,2024-11-05 09:00:00,2025-01-12 14:00:00
+P011,Product 11,dessert,cake,1 pc,"52,55",TRUE,13/11/2024 09:00:00,2025-01-06 20:00:00
+P012,Product 12,tea,black,1 slice,51.6,1,2024/11/12 09:00:00,N/A
+P013,Product 13,food,sandwich,300ml,81.93,1,2024/11/13 09:00:00,2025-01-03 10:00:00
+P014,Product 14,coffee,espresso,1 slice,55.8,no,07/11/2024 09:00:00,2025-01-07 09:00:00
+P015,Product 15,dessert,cake,300ml,66.45,yes,07/11/2024 09:00:00,12/01/2025 12:00:00
+P016,Product 16,tea,black,1 pc,"84,07",0,07/11/2024 09:00:00,N/A
+P017,Product 17,tea,black,250 ml,87.05,False,2024-11-14 09:00:00,N/A
+P018,Product 18,tea,black,1 pc,"49,29",0,2024-11-02 09:00:00,2025-01-01 14:00:00
+P019,Product 19,coffee,milk_coffee,300ml,48.27,true,04/11/2024 09:00:00,03/01/2025 18:00:00
+P020,Product 20,food,sandwich,1 slice,53.31,0,2024/11/08 09:00:00,N/A
+P021,Product 21,dessert,cake,300ml,68.46,False,2024/11/13 09:00:00,01/01/2025 14:00:00
+P022,Product 22,coffee,espresso,300ml,62.07,1,10/11/2024 09:00:00,06/01/2025 16:00:00
+P023,Product 23,coffee,milk_coffee,250 ml,64.51,false,2024-11-04 09:00:00,06/01/2025 11:00:00
+P024,Product 24,coffee,espresso,300ml,31.91,0,2024/11/13 09:00:00,N/A
+P025,Product 25,coffee,espresso,200ml,33.11,0,11/11/2024 09:00:00,N/A
+P026,Product 26,food,sandwich,300ml,44.62,TRUE,2024-11-11 09:00:00,2025-01-06 17:00:00
+P027,Product 27,coffee,espresso,250 ml,45.04,true,2024/11/15 09:00:00,03/01/2025 18:00:00
+P028,Product 28,coffee,espresso,1 pc,71.43,no,2024-11-04 09:00:00,03/01/2025 18:00:00
+P029,Product 29,food,sandwich,1 pc,65.71,1,13/11/2024 09:00:00,10/01/2025 09:00:00
