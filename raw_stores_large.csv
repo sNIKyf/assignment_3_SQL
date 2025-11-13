@@ -1,0 +1,7 @@
+store_id,store_name,city,address,open_date,close_date,status,timezone
+S10,"Bahrii Coffee, Kyiv #1",Kyiv,Market street 6,2023/10/24,2024-08-05,renovation,EET
+S11,"Bahrii Coffee, Kyiv #2",Kyiv,Market street 15,09/06/2023,2024-06-01,renovation,Europe/Kyiv
+S20,"Bahrii Coffee, Lviv #1",Lviv,Main street 11,2023-10-14,2024-09-18,Open,Europe/Kyiv
+S21,"Bahrii Coffee, Lviv #2",Lviv,Market street 9,28/06/2023,2024-08-07,Open,Europe/Kyiv
+S30,"Bahrii Coffee, Odessa #1",Odessa,Main street 16,2023/11/16,2024-07-04,closed,Europe/Kyiv
+S31,"Bahrii Coffee, Odessa #2",Odessa,Main street 19,2023-11-17,2024-10-15,Open,EET
