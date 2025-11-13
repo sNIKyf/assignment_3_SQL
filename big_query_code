@@ -1,0 +1,346 @@
+CREATE OR REPLACE TABLE cafe_data.stg_customers AS
+SELECT
+  customer_id,
+
+  COALESCE(
+    SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', created_at),
+    SAFE.PARSE_TIMESTAMP('%Y/%m/%d %H:%M:%S', created_at),
+    SAFE.PARSE_TIMESTAMP('%d-%m-%Y %H:%M:%S', created_at)
+  ) AS created_at,
+
+  first_name,
+  last_name,
+  email,
+  phone,
+
+  COALESCE(
+    SAFE.PARSE_DATE('%Y-%m-%d', birth_date),
+    SAFE.PARSE_DATE('%d/%m/%Y', birth_date),
+    SAFE.PARSE_DATE('%Y.%m.%d', birth_date)
+  ) AS birth_date,
+  gender,
+  city,
+  registration_source,
+  loyalty_level,
+  status
+FROM `assignment-477409.cafe_data.raw_customers`;
+
+
+
+CREATE OR REPLACE TABLE cafe_data.dim_customers AS
+SELECT
+  customer_id
+  created_at,
+  first_name,
+  last_name,
+  email,
+  phone,
+  birth_date,
+CASE 
+    WHEN LOWER(gender) IN ('m','male') THEN 'M'
+    WHEN LOWER(gender) IN ('f','female') THEN 'F'
+    ELSE 'U'
+  END AS gender,
+
+  CASE 
+    WHEN LOWER(city) IN ('kyiv','київ') THEN 'Kyiv'
+    WHEN LOWER(city) IN ('lviv','львів','l\'viv') THEN 'Lviv'
+    WHEN LOWER(city) IN ('odessa','odesa','одеса') THEN 'Odesa'
+    ELSE city
+  END AS city,
+
+  CASE 
+    WHEN LOWER(registration_source) LIKE '%mobile%' THEN 'mobile_app'
+    WHEN LOWER(registration_source) LIKE '%web%' THEN 'web'
+    WHEN LOWER(registration_source) LIKE '%cash%' THEN 'cashdesk'
+    ELSE 'other'
+  END AS registration_source,
+
+  CASE 
+    WHEN LOWER(loyalty_level) = 'bronze' THEN 'bronze'
+    WHEN LOWER(loyalty_level) = 'silver' THEN 'silver'
+    WHEN LOWER(loyalty_level) = 'gold' THEN 'gold'
+    ELSE 'none'
+  END AS loyalty_level,
+
+  CASE 
+    WHEN LOWER(status) = 'active' THEN 'active'
+    WHEN LOWER(status) = 'inactive' THEN 'inactive'
+    WHEN LOWER(status) = 'blocked' THEN 'blocked'
+    ELSE 'unknown'
+  END AS status
+FROM `assignment-477409.cafe_data.stg_customers`;
+
+
+CREATE OR REPLACE TABLE cafe_data.stg_products AS
+SELECT
+  product_id,
+  product_name,
+  category,
+  subcategory,
+  size,
+  base_price,
+  is_active,
+  COALESCE(
+    SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', created_at),
+    SAFE.PARSE_TIMESTAMP('%d/%m/%Y %H:%M:%S', created_at),
+    SAFE.PARSE_TIMESTAMP('%Y/%m/%d %H:%M:%S', created_at)
+  ) AS created_at,
+  COALESCE(
+    SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', NULLIF(updated_at, 'N/A')),
+    SAFE.PARSE_TIMESTAMP('%d/%m/%Y %H:%M:%S', NULLIF(updated_at, 'N/A')),
+    SAFE.PARSE_TIMESTAMP('%Y/%m/%d %H:%M:%S', NULLIF(updated_at, 'N/A'))
+  ) AS updated_at
+FROM `assignment-477409.cafe_data.raw_products` 
+
+
+CREATE OR REPLACE TABLE cafe_data.dim_products AS
+SELECT
+  product_id,
+  TRIM(product_name) AS product_name,
+  LOWER(TRIM(category))   AS category,
+  LOWER(TRIM(subcategory)) AS subcategory,
+  REPLACE(TRIM(size), ' ', '') AS size,
+  CAST(
+    REPLACE(CAST(base_price AS STRING), ',', '.')
+    AS NUMERIC
+  ) AS base_price,
+  CASE 
+    WHEN LOWER(is_active) IN ('true','1','yes') THEN TRUE
+    WHEN LOWER(is_active) IN ('false','0','no') THEN FALSE
+    ELSE NULL
+  END AS is_active,
+  created_at,
+  updated_at
+FROM `assignment-477409.cafe_data.stg_products` 
+
+
+
+CREATE OR REPLACE TABLE cafe_data.stg_stores AS
+SELECT
+  store_id,
+  store_name,
+  city,
+  address,
+  COALESCE(
+    SAFE.PARSE_DATE('%Y-%m-%d', NULLIF(open_date, '')),
+    SAFE.PARSE_DATE('%d/%m/%Y', NULLIF(open_date, '')),
+    SAFE.PARSE_DATE('%Y/%m/%d', NULLIF(open_date, ''))
+  ) AS open_date,
+
+  close_date,
+  status,
+  timezone
+
+FROM `assignment-477409.cafe_data.raw_stores`
+
+
+
+CREATE OR REPLACE TABLE cafe_data.dim_stores AS
+SELECT
+  store_id,
+  store_name,
+
+  CASE 
+    WHEN LOWER(city) IN ('kyiv','київ') THEN 'Kyiv'
+    WHEN LOWER(city) IN ('lviv','львів') THEN 'Lviv'
+    WHEN LOWER(city) IN ('odessa','odesa','одеса') THEN 'Odesa'
+    ELSE city
+  END AS city,
+
+  address,
+  open_date,
+  close_date,
+
+  CASE 
+    WHEN LOWER(status) = 'open' THEN 'open'
+    WHEN LOWER(status) = 'closed' THEN 'closed'
+    WHEN LOWER(status) = 'renovation' THEN 'renovation'
+    ELSE 'unknown'
+  END AS status,
+
+  'Europe/Kyiv' AS timezone
+
+FROM `assignment-477409.cafe_data.stg_stores`
+
+
+CREATE OR REPLACE TABLE cafe_data.stg_orders AS
+SELECT
+  order_id,
+  order_line_id,
+  store_id,
+  customer_id,
+
+  COALESCE(
+    SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', order_datetime),
+    SAFE.PARSE_TIMESTAMP('%d/%m/%Y %H:%M:%S', order_datetime),
+    SAFE.PARSE_TIMESTAMP('%Y/%m/%d %H:%M:%S', order_datetime),
+    SAFE.PARSE_TIMESTAMP('%Y-%m-%dT%H:%M:%S', order_datetime)
+  ) AS order_datetime,
+
+  payment_method,
+  order_status,
+  product_id,
+  CAST(quantity AS INT64) AS quantity,
+  CAST(unit_price AS NUMERIC)       AS unit_price,
+  CAST(discount_amount AS NUMERIC)  AS discount_amount,
+  CAST(total_line_amount AS NUMERIC) AS total_line_amount,
+  NULLIF(promo_code, '') AS promo_code,
+  employee_id
+
+FROM `assignment-477409.cafe_data.raw_orders`
+
+
+CREATE OR REPLACE TABLE cafe_data.dim_orders AS
+SELECT
+  order_id,
+  order_line_id,
+  store_id,
+  customer_id,
+  order_datetime,
+  CASE 
+    WHEN LOWER(REPLACE(payment_method, ' ', '')) = 'card' THEN 'card'
+    WHEN LOWER(REPLACE(payment_method, ' ', '')) = 'cash' THEN 'cash'
+    WHEN LOWER(REPLACE(payment_method, ' ', '')) IN ('applepay','apple_pay') THEN 'apple_pay'
+    WHEN LOWER(REPLACE(payment_method, ' ', '')) IN ('googlepay','google_pay') THEN 'google_pay'
+    ELSE 'other'
+  END AS payment_method,
+
+  CASE 
+    WHEN LOWER(order_status) = 'completed' THEN 'completed'
+    WHEN LOWER(order_status) IN ('cancelled','canceled') THEN 'cancelled'
+    WHEN LOWER(order_status) = 'refunded' THEN 'refunded'
+    ELSE 'unknown'
+  END AS order_status,
+
+  product_id,
+  quantity,
+  unit_price,
+  discount_amount,
+  total_line_amount,
+  promo_code,
+  employee_id
+
+FROM `assignment-477409.cafe_data.stg_orders`
+
+
+
+CREATE OR REPLACE TABLE cafe_data.fact_sales AS
+SELECT
+  s.store_id,
+  s.store_name,
+  s.city AS store_city,
+
+  p.category,
+  p.subcategory,
+
+  DATE(o.order_datetime) AS order_date,
+  SUM(o.total_line_amount) AS total_revenue,
+  SUM(o.quantity)          AS total_qty,
+  COUNT(DISTINCT o.order_id) AS orders_count
+
+FROM cafe_data.stg_orders   AS o
+JOIN cafe_data.stg_products AS p
+  ON o.product_id = p.product_id
+JOIN cafe_data.stg_stores   AS s
+  ON o.store_id = s.store_id
+
+WHERE
+  o.order_status = 'completed'
+  AND DATE(o.order_datetime) BETWEEN '2025-01-01' AND '2025-01-31'
+
+GROUP BY
+  s.store_id,
+  s.store_name,
+  s.city,
+  p.category,
+  p.subcategory,
+  order_date;
+
+
+
+
+# Bonus
+
+#CREATE TABLE `assignment-477409.cafe_data.dim_customer_loyalty_history` (
+#    loyalty_key STRING,
+#    customer_id STRING,
+#    loyalty_level STRING,
+#    start_date DATE,
+#    end_date DATE,
+#    is_current BOOL
+#)
+
+# getting new loyalty data from dim_customers
+MERGE INTO
+    `assignment-477409.cafe_data.dim_customer_loyalty_history` AS Target
+USING(
+  WITH
+    order_customer AS (
+      SELECT 
+        customer_id,
+        COUNT(DISTINCT order_id) AS cust_total_orders
+      FROM 
+        `assignment-477409.cafe_data.dim_orders`
+      GROUP BY customer_id
+    )
+      SELECT
+        t1.customer_id,
+        t2.cust_total_orders,
+        CASE
+          WHEN t2.cust_total_orders >= 8 THEN 'gold'
+          WHEN t2.cust_total_orders >= 4 THEN 'silver'
+          WHEN t2.cust_total_orders >= 2 THEN 'bronze'
+          ELSE 'none'
+        END AS new_loyalty_level
+        FROM
+          `assignment-477409.cafe_data.dim_customers` AS t1
+        LEFT JOIN order_customer AS t2
+          ON t1.customer_id = t2.customer_id
+    ) AS Source
+ON
+    Target.customer_id = Source.customer_id AND Target.is_current = TRUE
+
+# updating the old records
+WHEN MATCHED AND Target.loyalty_level != Source.new_loyalty_level THEN
+  UPDATE SET
+    Target.end_date = CURRENT_DATE(),
+    Target.is_current = FALSE
+
+# inserting the new records
+WHEN NOT MATCHED THEN
+  INSERT (
+    loyalty_key,  
+    customer_id,
+    loyalty_level,
+    start_date,
+    end_date,
+    is_current
+  )
+  VALUES (
+    GENERATE_UUID(),
+    Source.customer_id,
+    Source.new_loyalty_level,
+    CURRENT_DATE(), 
+    DATE '9999-12-31',
+    TRUE
+  );
+
+# updating the dim_customers with the current levels
+  MERGE INTO
+    `assignment-477409.cafe_data.dim_customers` AS Target
+USING
+    (
+    SELECT
+      customer_id,
+      loyalty_level
+    FROM
+      `assignment-477409.cafe_data.dim_customer_loyalty_history`
+    WHERE
+      is_current = TRUE
+    ) AS Source
+ON
+    Target.customer_id = Source.customer_id
+WHEN MATCHED AND Target.loyalty_level != Source.loyalty_level THEN
+  UPDATE SET
+    Target.loyalty_level = Source.loyalty_level
